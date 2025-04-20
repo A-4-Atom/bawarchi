@@ -39,7 +39,7 @@ function InitialLayout() {
     if (isSignedIn && !inTabsGroup) {
       router.replace("/home");
     } else if (!isSignedIn) {
-      router.replace("/login");
+      router.replace("/welcome");
     }
   }, [isSignedIn])
 

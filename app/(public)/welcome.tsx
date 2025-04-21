@@ -49,8 +49,7 @@ export default function Welcome() {
   }, [currentIndex]);
 
   const bgColor = animation.interpolate({
-    inputRange: [0, 1, 2],
-    outputRange: bgColors,
+    inputRange: Array.from({ length: slides.length }, (_, i) => i),
   });
 
   interface ScrollEvent {

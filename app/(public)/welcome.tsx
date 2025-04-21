@@ -22,8 +22,7 @@ const slides = [
   {
     id: "2",
     title: "Get a Plan",
-    description:
-      "No more guesssing meals, grab a plan and eat smart every day!",
+    description: "No more guessing meals, grab a plan and eat smart every day!",
     image: require("../../assets/images/chole.png"),
   },
   {

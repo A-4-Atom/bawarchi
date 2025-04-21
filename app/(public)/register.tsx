@@ -1,16 +1,16 @@
-import { Button, TextInput, View, StyleSheet } from 'react-native';
-import { useSignUp } from '@clerk/clerk-expo';
-import Spinner from 'react-native-loading-spinner-overlay';
-import { useState } from 'react';
-import { Stack } from 'expo-router';
+import { TouchableOpacity, TextInput, View, StyleSheet, Text, Button } from "react-native";
+import { useSignUp } from "@clerk/clerk-expo";
+import Spinner from "react-native-loading-spinner-overlay";
+import { useState } from "react";
+import { Stack } from "expo-router";
 
 const Register = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
 
-  const [emailAddress, setEmailAddress] = useState('');
-  const [password, setPassword] = useState('');
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
   const [pendingVerification, setPendingVerification] = useState(false);
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Create the user and send the verification email
@@ -28,7 +28,7 @@ const Register = () => {
       });
 
       // Send verification Email
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
       // change the UI to verify the email address
       setPendingVerification(true);
@@ -63,7 +63,7 @@ const Register = () => {
     <View style={styles.container}>
       <Stack.Screen options={{ headerBackVisible: !pendingVerification }} />
       <Spinner visible={loading} />
-
+      
       {!pendingVerification && (
         <>
           <TextInput autoCapitalize="none" placeholder="Enter Your Email" value={emailAddress} onChangeText={setEmailAddress} style={styles.inputField} />
@@ -74,10 +74,26 @@ const Register = () => {
 
       {pendingVerification && (
         <>
-          <View>
-            <TextInput value={code} placeholder="Code..." style={styles.inputField} onChangeText={setCode} />
+          <View className="flex flex-col items-center justify-center mb-4 gap-5">
+            <Text className="font-[Roboto-Bold] font-bold text-4xl">
+              Verification
+            </Text>
+            <Text className="text-xl">Enter the OTP Sent in the E-Mail</Text>
           </View>
-          <Button onPress={onPressVerify} title="Verify Email" color={'#6c47ff'}></Button>
+          <View>
+            <TextInput
+              value={code}
+              placeholder="Code..."
+              style={styles.inputField}
+              onChangeText={setCode}
+            />
+          </View>
+          <TouchableOpacity
+            className="bg-[#FF9B17] rounded-full px-10 py-3 mt-6"
+            onPress={onPressVerify}
+          >
+            <Text className="text-white text-2xl font-bold text-center py-1">Verify Email</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>
@@ -87,21 +103,21 @@ const Register = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   inputField: {
     marginVertical: 4,
     height: 50,
     borderWidth: 1,
-    borderColor: '#6c47ff',
+    borderColor: "#FF9B17",
     borderRadius: 4,
     padding: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   button: {
     margin: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
 });
 

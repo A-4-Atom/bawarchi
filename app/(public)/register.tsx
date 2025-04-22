@@ -4,8 +4,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  Button,
-  Text
+  Text,
 } from 'react-native';
 import { useSignUp } from '@clerk/clerk-expo';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -45,13 +44,55 @@ const Register = () => {
       <Stack.Screen options={{ headerBackVisible: true }} />
       <Spinner visible={loading} />
 
-      {!pendingVerification && (
-        <>
-          <TextInput autoCapitalize="none" placeholder="Enter Your Email" value={emailAddress} onChangeText={setEmailAddress} style={styles.inputField} />
-          <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.inputField} />
-          <Button onPress={onSignUpPress} title="Sign up" color={'#6c47ff'}></Button>
-        </>
-      )}
+      {/* Profile Icon */}
+      <Image
+        source={require('../../assets/profileImg.jpg')}
+        style={styles.profileImage}
+        resizeMode="contain"
+      />
+
+      {/* Name */}
+      <TextInput
+        placeholder="Name"
+        placeholderTextColor="#fff"
+        value={name}
+        onChangeText={setName}
+        style={styles.inputField}
+      />
+
+      {/* College Dropdown */}
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={college}
+          onValueChange={(itemValue) => setCollege(itemValue)}
+          style={styles.picker}
+          dropdownIconColor="#fff"
+        >
+          <Picker.Item label="BVIMR" value="BVIMR" />
+          <Picker.Item label="BVICAM" value="BVICAM" />
+          <Picker.Item label="BVCOE" value="BVCOE" />
+        </Picker>
+      </View>
+
+      {/* Email */}
+      <TextInput
+        placeholder="Email"
+        placeholderTextColor="#fff"
+        value={emailAddress}
+        onChangeText={setEmailAddress}
+        autoCapitalize="none"
+        style={styles.inputField}
+      />
+
+      {/* Password */}
+      <TextInput
+        placeholder="Password"
+        placeholderTextColor="#fff"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={styles.inputField}
+      />
 
       {/* Terms */}
       <View style={{ alignItems: 'center', marginVertical: 10 }}>

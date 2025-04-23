@@ -2,7 +2,6 @@ import {
   View,
   StyleSheet,
   TextInput,
-  Button,
   Text,
   TouchableOpacity,
   Image,
@@ -73,7 +72,7 @@ const PwReset = () => {
             style={styles.inputField}
           />
           <TouchableOpacity style={styles.resetButton} onPress={onRequestReset}>
-            <Text style={styles.resetButtonText}>Verify Email</Text>
+            <Text style={styles.resetButtonText}>Send Reset Email</Text>
           </TouchableOpacity>
         </>
       )}
@@ -83,12 +82,12 @@ const PwReset = () => {
           <View>
             <TextInput
               value={code}
-              placeholder="Code..."
+              placeholder="Enter Code"
               style={styles.inputField}
               onChangeText={setCode}
             />
             <TextInput
-              placeholder="New password"
+              placeholder="Enter New password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry

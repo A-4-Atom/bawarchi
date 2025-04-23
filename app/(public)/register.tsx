@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-  Button,
 } from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
 import Spinner from "react-native-loading-spinner-overlay";

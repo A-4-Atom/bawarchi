@@ -22,6 +22,7 @@ const Register = () => {
   const [college, setCollege] = useState("BVIMR");
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
@@ -38,6 +39,9 @@ const Register = () => {
       });
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
       setPendingVerification(true);
     } catch (err: any) {
       alert(err.errors[0].message);
@@ -97,7 +101,7 @@ const Register = () => {
     <View style={styles.container}>
       <Stack.Screen options={{ headerBackVisible: true }} />
       <Spinner visible={loading} />
-
+      
       {!pendingVerification && (
         <>
           <Image
@@ -157,6 +161,12 @@ const Register = () => {
 
       {pendingVerification && (
         <>
+          <View className="flex flex-col items-center justify-center mb-4 gap-5">
+            <Text className="font-[Roboto-Bold] font-bold text-4xl">
+              Verification
+            </Text>
+            <Text className="text-xl">Enter the OTP Sent in the E-Mail</Text>
+          </View>
           <View>
             <TextInput
               value={code}

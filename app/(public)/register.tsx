@@ -14,7 +14,6 @@ import { Stack } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import { useUser } from "@clerk/clerk-expo";
 
-
 const Register = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
   const { user } = useUser();
@@ -22,11 +21,10 @@ const Register = () => {
   const [college, setCollege] = useState("BVIMR");
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
-  const [metadataUpdated, setMetadataUpdated] = useState(false); 
+  const [metadataUpdated, setMetadataUpdated] = useState(false);
 
   const onSignUpPress = async () => {
     if (!isLoaded) return;
@@ -69,7 +67,6 @@ const Register = () => {
           collegeName: college,
         },
       });
-
     } catch (err: any) {
       alert(err.errors[0].message);
     } finally {
@@ -101,7 +98,7 @@ const Register = () => {
     <View style={styles.container}>
       <Stack.Screen options={{ headerBackVisible: true }} />
       <Spinner visible={loading} />
-      
+
       {!pendingVerification && (
         <>
           <Image
@@ -161,25 +158,32 @@ const Register = () => {
 
       {pendingVerification && (
         <>
+          <Image
+            source={require("../../assets/images/verifyImage.png")}
+            className="w-1/2 h-64"
+            resizeMode="contain" 
+          />
           <View className="flex flex-col items-center justify-center mb-4 gap-5">
             <Text className="font-[Roboto-Bold] font-bold text-4xl">
               Verification
             </Text>
             <Text className="text-xl">Enter the OTP Sent in the E-Mail</Text>
           </View>
-          <View>
+          <View className="w-full">
             <TextInput
               value={code}
-              placeholder="Code..."
+              placeholder="Enter Code"
               style={styles.inputField}
               onChangeText={setCode}
+              keyboardType="numeric"
             />
           </View>
-          <Button
+          <TouchableOpacity
+            style={styles.registerButton}
             onPress={onPressVerify}
-            title="Verify Email"
-            color={"#6c47ff"}
-          ></Button>
+          >
+            <Text style={styles.registerButtonText}>Verify Email</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>

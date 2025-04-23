@@ -1,4 +1,12 @@
-import { View, StyleSheet, TextInput, Button } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Button,
+  Text,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import React, { useState } from "react";
 import { Stack } from "expo-router";
 import { useSignIn } from "@clerk/clerk-expo";
@@ -46,22 +54,27 @@ const PwReset = () => {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerBackVisible: !successfulCreation }} />
+      <Image
+        source={require("../../assets/images/resetImage.png")}
+        style={styles.resetImage}
+        resizeMode="contain"
+      />
+      <Text className="text-center font-[Roboto-Bold] text-3xl my-4 mb-20">
+        Reset Password
+      </Text>
 
       {!successfulCreation && (
         <>
           <TextInput
             autoCapitalize="none"
-            placeholder="simon@galaxies.dev"
+            placeholder="Enter Email"
             value={emailAddress}
             onChangeText={setEmailAddress}
             style={styles.inputField}
           />
-
-          <Button
-            onPress={onRequestReset}
-            title="Send Reset Email"
-            color={"#6c47ff"}
-          ></Button>
+          <TouchableOpacity style={styles.resetButton} onPress={onRequestReset}>
+            <Text style={styles.resetButtonText}>Verify Email</Text>
+          </TouchableOpacity>
         </>
       )}
 
@@ -82,11 +95,9 @@ const PwReset = () => {
               style={styles.inputField}
             />
           </View>
-          <Button
-            onPress={onReset}
-            title="Set new Password"
-            color={"#6c47ff"}
-          ></Button>
+          <TouchableOpacity style={styles.resetButton} onPress={onReset}>
+            <Text style={styles.resetButtonText}>Verify Email</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>
@@ -100,17 +111,42 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   inputField: {
-    marginVertical: 4,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#6c47ff",
-    borderRadius: 4,
-    padding: 10,
-    backgroundColor: "#fff",
+    width: "100%",
+    height: 55,
+    backgroundColor: "#F4B400",
+    borderRadius: 15,
+    paddingHorizontal: 20,
+    marginBottom: 15,
+    fontSize: 16,
+    color: "#fff",
   },
   button: {
     margin: 8,
     alignItems: "center",
+  },
+  resetButton: {
+    backgroundColor: "#FF9800",
+    paddingVertical: 15,
+    paddingHorizontal: 100,
+    borderRadius: 30,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    alignItems: "center",
+  },
+  resetButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  resetImage: {
+    width: 150,
+    height: 150,
+    marginBottom: 10,
+    alignSelf: "center",
   },
 });
 

@@ -11,10 +11,7 @@ const PublicLayout = () => {
       }}
     >
       <Stack.Screen name="login" options={{ headerTitle: "Quick Alert" }} />
-      <Stack.Screen
-        name="register"
-        options={{ headerTitle: "Create Account" }}
-      />
+      <Stack.Screen name="register" options={{ headerShown: false }} />
       <Stack.Screen name="reset" options={{ headerTitle: "Reset Password" }} />
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
     </Stack>

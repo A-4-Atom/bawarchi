@@ -1,36 +1,47 @@
-import { TouchableOpacity, TextInput, View, StyleSheet, Text, Button } from "react-native";
+import {
+  TextInput,
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Button,
+} from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
 import Spinner from "react-native-loading-spinner-overlay";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Stack } from "expo-router";
+import { Picker } from "@react-native-picker/picker";
+import { useUser } from "@clerk/clerk-expo";
+
 
 const Register = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
-
+  const { user } = useUser();
+  const [name, setName] = useState("");
+  const [college, setCollege] = useState("BVIMR");
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [metadataUpdated, setMetadataUpdated] = useState(false); 
 
-  // Create the user and send the verification email
   const onSignUpPress = async () => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
     setLoading(true);
 
     try {
-      // Create the user on Clerk
       await signUp.create({
         emailAddress,
         password,
       });
 
-      // Send verification Email
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
-      // change the UI to verify the email address
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
       setPendingVerification(true);
     } catch (err: any) {
       alert(err.errors[0].message);
@@ -39,7 +50,6 @@ const Register = () => {
     }
   };
 
-  // Verify the email address
   const onPressVerify = async () => {
     if (!isLoaded) {
       return;
@@ -52,6 +62,14 @@ const Register = () => {
       });
 
       await setActive({ session: completeSignUp.createdSessionId });
+
+      await user?.update({
+        unsafeMetadata: {
+          fullName: name,
+          collegeName: college,
+        },
+      });
+
     } catch (err: any) {
       alert(err.errors[0].message);
     } finally {
@@ -59,16 +77,85 @@ const Register = () => {
     }
   };
 
+  useEffect(() => {
+    const updateMetadata = async () => {
+      if (user && !metadataUpdated && pendingVerification) {
+        try {
+          await user.update({
+            unsafeMetadata: {
+              fullName: name,
+              collegeName: college,
+            },
+          });
+          setMetadataUpdated(true);
+        } catch (err: any) {
+          console.error("Metadata update failed:", err);
+        }
+      }
+    };
+
+    updateMetadata();
+  }, [user]);
+
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerBackVisible: !pendingVerification }} />
+      <Stack.Screen options={{ headerBackVisible: true }} />
       <Spinner visible={loading} />
       
       {!pendingVerification && (
         <>
-          <TextInput autoCapitalize="none" placeholder="Enter Your Email" value={emailAddress} onChangeText={setEmailAddress} style={styles.inputField} />
-          <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.inputField} />
-          <Button onPress={onSignUpPress} title="Sign up" color={'#6c47ff'}></Button>
+          <Image
+            source={require("../../assets/images/registerImg.jpg")}
+            style={styles.profileImage}
+            resizeMode="contain"
+          />
+          <TextInput
+            placeholder="Name"
+            placeholderTextColor="#fff"
+            value={name}
+            onChangeText={setName}
+            style={styles.inputField}
+          />
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={college}
+              onValueChange={(itemValue) => setCollege(itemValue)}
+              style={styles.picker}
+              dropdownIconColor="#fff"
+            >
+              <Picker.Item label="BVIMR" value="BVIMR" />
+              <Picker.Item label="BVICAM" value="BVICAM" />
+              <Picker.Item label="BVCOE" value="BVCOE" />
+            </Picker>
+          </View>
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#fff"
+            value={emailAddress}
+            onChangeText={setEmailAddress}
+            autoCapitalize="none"
+            style={styles.inputField}
+          />
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#fff"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={styles.inputField}
+          />
+          <View style={{ alignItems: "center", marginVertical: 10 }}>
+            <Text style={styles.termsText}>
+              By Registering you agree to our
+            </Text>
+            <Text style={styles.termsBold}>Terms & Conditions</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={onSignUpPress}
+          >
+            <Text style={styles.registerButtonText}>Register</Text>
+          </TouchableOpacity>
         </>
       )}
 
@@ -88,37 +175,80 @@ const Register = () => {
               onChangeText={setCode}
             />
           </View>
-          <TouchableOpacity
-            className="bg-[#FF9B17] rounded-full px-10 py-3 mt-6"
+          <Button
             onPress={onPressVerify}
-          >
-            <Text className="text-white text-2xl font-bold text-center py-1">Verify Email</Text>
-          </TouchableOpacity>
+            title="Verify Email"
+            color={"#6c47ff"}
+          ></Button>
         </>
       )}
     </View>
   );
 };
 
+export default Register;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFF176",
+    alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    paddingHorizontal: 25,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 30,
+    borderRadius: 60,
   },
   inputField: {
-    marginVertical: 4,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#FF9B17",
-    borderRadius: 4,
-    padding: 10,
-    backgroundColor: "#fff",
+    width: "100%",
+    height: 55,
+    backgroundColor: "#F4B400",
+    borderRadius: 15,
+    paddingHorizontal: 20,
+    marginBottom: 15,
+    fontSize: 16,
+    color: "#fff",
   },
-  button: {
-    margin: 8,
-    alignItems: "center",
+  pickerContainer: {
+    width: "100%",
+    height: 55,
+    backgroundColor: "#F4B400",
+    borderRadius: 15,
+    justifyContent: "center",
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  picker: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  termsText: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#000",
+  },
+  termsBold: {
+    fontWeight: "bold",
+    color: "#000",
+  },
+  registerButton: {
+    backgroundColor: "#FF9800",
+    paddingVertical: 15,
+    paddingHorizontal: 100,
+    borderRadius: 30,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  registerButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
-
-export default Register;

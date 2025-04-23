@@ -111,6 +111,8 @@ const Register = () => {
             value={name}
             onChangeText={setName}
             style={styles.inputField}
+            autoCapitalize="words"
+            inputMode="text"
           />
           <View style={styles.pickerContainer}>
             <Picker
@@ -131,6 +133,7 @@ const Register = () => {
             onChangeText={setEmailAddress}
             autoCapitalize="none"
             style={styles.inputField}
+            inputMode="email"
           />
           <TextInput
             placeholder="Password"
@@ -139,6 +142,8 @@ const Register = () => {
             onChangeText={setPassword}
             secureTextEntry
             style={styles.inputField}
+            inputMode="text"
+            autoCapitalize="none"
           />
           <View style={{ alignItems: "center", marginVertical: 10 }}>
             <Text style={styles.termsText}>

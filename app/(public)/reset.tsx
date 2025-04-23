@@ -95,7 +95,7 @@ const PwReset = () => {
             />
           </View>
           <TouchableOpacity style={styles.resetButton} onPress={onReset}>
-            <Text style={styles.resetButtonText}>Verify Email</Text>
+            <Text style={styles.resetButtonText}>Set New Password</Text>
           </TouchableOpacity>
         </>
       )}

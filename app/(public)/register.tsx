@@ -5,33 +5,40 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-} from 'react-native';
-import { useSignUp } from '@clerk/clerk-expo';
-import Spinner from 'react-native-loading-spinner-overlay';
-import { useState } from 'react';
-import { Stack } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
+  Button,
+} from "react-native";
+import { useSignUp } from "@clerk/clerk-expo";
+import Spinner from "react-native-loading-spinner-overlay";
+import { useState, useEffect } from "react";
+import { Stack } from "expo-router";
+import { Picker } from "@react-native-picker/picker";
+import { useUser } from "@clerk/clerk-expo";
+
 
 const Register = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
-
-  const [name, setName] = useState('');
-  const [college, setCollege] = useState('BVIMR');
-  const [emailAddress, setEmailAddress] = useState('');
-  const [password, setPassword] = useState('');
+  const { user } = useUser();
+  const [name, setName] = useState("");
+  const [college, setCollege] = useState("BVIMR");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState("");
+  const [metadataUpdated, setMetadataUpdated] = useState(false); 
 
   const onSignUpPress = async () => {
     if (!isLoaded) return;
     setLoading(true);
 
     try {
-      const result = await signUp.create({
+      await signUp.create({
         emailAddress,
         password,
       });
 
-      await setActive({ session: result.createdSessionId });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setPendingVerification(true);
     } catch (err: any) {
       alert(err.errors[0].message);
     } finally {
@@ -39,71 +46,132 @@ const Register = () => {
     }
   };
 
+  const onPressVerify = async () => {
+    if (!isLoaded) {
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code,
+      });
+
+      await setActive({ session: completeSignUp.createdSessionId });
+
+      await user?.update({
+        unsafeMetadata: {
+          fullName: name,
+          collegeName: college,
+        },
+      });
+
+    } catch (err: any) {
+      alert(err.errors[0].message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const updateMetadata = async () => {
+      if (user && !metadataUpdated && pendingVerification) {
+        try {
+          await user.update({
+            unsafeMetadata: {
+              fullName: name,
+              collegeName: college,
+            },
+          });
+          setMetadataUpdated(true);
+        } catch (err: any) {
+          console.error("Metadata update failed:", err);
+        }
+      }
+    };
+
+    updateMetadata();
+  }, [user]);
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerBackVisible: true }} />
       <Spinner visible={loading} />
 
-      {/* Profile Icon */}
-      <Image
-        source={require('../../assets/profileImg.jpg')}
-        style={styles.profileImage}
-        resizeMode="contain"
-      />
+      {!pendingVerification && (
+        <>
+          <Image
+            source={require("../../assets/images/registerImg.jpg")}
+            style={styles.profileImage}
+            resizeMode="contain"
+          />
+          <TextInput
+            placeholder="Name"
+            placeholderTextColor="#fff"
+            value={name}
+            onChangeText={setName}
+            style={styles.inputField}
+          />
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={college}
+              onValueChange={(itemValue) => setCollege(itemValue)}
+              style={styles.picker}
+              dropdownIconColor="#fff"
+            >
+              <Picker.Item label="BVIMR" value="BVIMR" />
+              <Picker.Item label="BVICAM" value="BVICAM" />
+              <Picker.Item label="BVCOE" value="BVCOE" />
+            </Picker>
+          </View>
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#fff"
+            value={emailAddress}
+            onChangeText={setEmailAddress}
+            autoCapitalize="none"
+            style={styles.inputField}
+          />
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#fff"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={styles.inputField}
+          />
+          <View style={{ alignItems: "center", marginVertical: 10 }}>
+            <Text style={styles.termsText}>
+              By Registering you agree to our
+            </Text>
+            <Text style={styles.termsBold}>Terms & Conditions</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={onSignUpPress}
+          >
+            <Text style={styles.registerButtonText}>Register</Text>
+          </TouchableOpacity>
+        </>
+      )}
 
-      {/* Name */}
-      <TextInput
-        placeholder="Name"
-        placeholderTextColor="#fff"
-        value={name}
-        onChangeText={setName}
-        style={styles.inputField}
-      />
-
-      {/* College Dropdown */}
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={college}
-          onValueChange={(itemValue) => setCollege(itemValue)}
-          style={styles.picker}
-          dropdownIconColor="#fff"
-        >
-          <Picker.Item label="BVIMR" value="BVIMR" />
-          <Picker.Item label="BVICAM" value="BVICAM" />
-          <Picker.Item label="BVCOE" value="BVCOE" />
-        </Picker>
-      </View>
-
-      {/* Email */}
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#fff"
-        value={emailAddress}
-        onChangeText={setEmailAddress}
-        autoCapitalize="none"
-        style={styles.inputField}
-      />
-
-      {/* Password */}
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#fff"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.inputField}
-      />
-
-      {/* Terms */}
-      <View style={{ alignItems: 'center', marginVertical: 10 }}>
-        <Text style={styles.termsText}>By Registering you agree to our</Text>
-        <Text style={styles.termsBold}>Terms & Conditions</Text>
-      </View>
-
-      {/* Register Button */}
-      <TouchableOpacity style={styles.registerButton} onPress={onSignUpPress}>
-        <Text style={styles.registerButtonText}>Register</Text>
-      </TouchableOpacity>
+      {pendingVerification && (
+        <>
+          <View>
+            <TextInput
+              value={code}
+              placeholder="Code..."
+              style={styles.inputField}
+              onChangeText={setCode}
+            />
+          </View>
+          <Button
+            onPress={onPressVerify}
+            title="Verify Email"
+            color={"#6c47ff"}
+          ></Button>
+        </>
+      )}
     </View>
   );
 };
@@ -113,9 +181,9 @@ export default Register;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF176',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FFF176",
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 25,
   },
   profileImage: {
@@ -125,52 +193,52 @@ const styles = StyleSheet.create({
     borderRadius: 60,
   },
   inputField: {
-    width: '100%',
+    width: "100%",
     height: 55,
-    backgroundColor: '#F4B400',
+    backgroundColor: "#F4B400",
     borderRadius: 15,
     paddingHorizontal: 20,
     marginBottom: 15,
     fontSize: 16,
-    color: '#fff',
+    color: "#fff",
   },
   pickerContainer: {
-    width: '100%',
+    width: "100%",
     height: 55,
-    backgroundColor: '#F4B400',
+    backgroundColor: "#F4B400",
     borderRadius: 15,
-    justifyContent: 'center',
+    justifyContent: "center",
     marginBottom: 15,
     paddingHorizontal: 10,
   },
   picker: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
   termsText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
-    color: '#000',
+    color: "#000",
   },
   termsBold: {
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
   },
   registerButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: "#FF9800",
     paddingVertical: 15,
-    paddingHorizontal: 50,
+    paddingHorizontal: 100,
     borderRadius: 30,
     marginTop: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 2, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
   },
   registerButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 16,
   },
 });

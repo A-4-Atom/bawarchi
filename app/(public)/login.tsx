@@ -1,28 +1,23 @@
-import { useSignIn } from '@clerk/clerk-expo';
-import { Link } from 'expo-router';
-import React, { useState } from 'react';
-import { 
-  View, 
-  StyleSheet, 
+import { useSignIn } from "@clerk/clerk-expo";
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
   TextInput,
-  Image, 
-  Button, 
-  Pressable, 
-  Text, 
-  Alert, 
-  TouchableOpacity, 
-  ActivityIndicator 
-} from 'react-native';
-import Spinner from 'react-native-loading-spinner-overlay';
+  Image,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { router } from "expo-router";
 
 const Login = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
-
-  const [emailAddress, setEmailAddress] = useState('');
-  const [password, setPassword] = useState('');
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  
+
   const onSignInPress = async () => {
     if (!isLoaded) {
       return;
@@ -48,7 +43,7 @@ const Login = () => {
       {/* Top Image */}
       <View style={styles.imageContainer}>
         <Image
-          source={require('../../assets/images/loginImg.jpg')}
+          source={require("../../assets/images/loginImg.jpg")}
           style={styles.topImage}
           resizeMode="cover"
         />
@@ -59,11 +54,12 @@ const Login = () => {
         <Text style={styles.heading}>Sign In</Text>
 
         <TextInput
-          placeholder="User Name"
+          placeholder="Email"
           placeholderTextColor="#fff"
           value={emailAddress}
           onChangeText={setEmailAddress}
           style={styles.inputField}
+          inputMode="email"
         />
         <TextInput
           placeholder="Password"
@@ -72,22 +68,15 @@ const Login = () => {
           onChangeText={setPassword}
           secureTextEntry
           style={styles.inputField}
+          inputMode="text"
         />
 
-        {/* Remember me and forgot password */}
         <View style={styles.row}>
-          <TouchableOpacity
-            style={[styles.checkbox, rememberMe && styles.checkboxChecked]}
-            onPress={() => setRememberMe(!rememberMe)}
-          />
-          <Text style={styles.rememberText}>Remember me</Text>
-
-          <Pressable style={{ marginLeft: 'auto' }}>
+          <Pressable style={{ marginLeft: "auto" }} onPress={() => router.push("/(public)/reset")}>
             <Text style={styles.linkText}>Forgot Password?</Text>
           </Pressable>
         </View>
 
-        {/* Login Button */}
         <TouchableOpacity onPress={onSignInPress} style={styles.loginButton}>
           {loading ? (
             <ActivityIndicator color="#000" />
@@ -96,103 +85,110 @@ const Login = () => {
           )}
         </TouchableOpacity>
 
-        {/* Register */}
         <Text style={styles.registerText}>
-          Don’t have an account?{' '}
-          <Text style={styles.registerLink}>Register</Text> here!
+          Don't have an account?{" "}
+          <Text
+            style={styles.registerLink}
+            onPress={() => router.push("/(public)/register")}
+          >
+            Register
+          </Text>{" "}
+          here!
         </Text>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   imageContainer: {
     height: 300,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   topImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   formContainer: {
     flex: 1,
-    backgroundColor: '#FFA500',
+    backgroundColor: "#FFA500",
     borderTopLeftRadius: 70,
     padding: 25,
     marginTop: -40, // to overlay slightly like in image
   },
   heading: {
     fontSize: 26,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     marginBottom: 20,
+    marginTop: 80
   },
   inputField: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#fff',
+    borderColor: "#fff",
     borderRadius: 25,
     paddingHorizontal: 20,
     marginBottom: 15,
-    color: '#fff',
+    color: "#fff",
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   checkbox: {
     width: 15,
     height: 15,
     borderWidth: 1,
-    borderColor: '#fff',
+    borderColor: "#fff",
     marginRight: 8,
     borderRadius: 3,
   },
   checkboxChecked: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   rememberText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
   },
   linkText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   loginButton: {
-    backgroundColor: '#FFEB3B',
+    backgroundColor: "#FFEB3B",
     paddingVertical: 15,
     borderRadius: 30,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 15,
-    shadowColor: '#000',
+    marginTop: 15,
+    shadowColor: "#000",
     shadowOffset: { width: 2, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
   loginButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
   },
   registerText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontSize: 12,
+    textAlign: "center",
+    color: "#fff",
+    fontSize: 15,
   },
   registerLink: {
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+    fontSize: 16,
   },
 });
-
 
 export default Login;

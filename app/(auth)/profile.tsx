@@ -14,7 +14,6 @@ const Profile = () => {
         return;
     }
     try {
-      // This is not working!
       const result = await user.update({
         firstName: firstName || 'John',
         lastName: lastName || 'Doe',

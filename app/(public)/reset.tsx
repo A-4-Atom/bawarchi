@@ -85,6 +85,7 @@ const PwReset = () => {
               placeholder="Enter Code"
               style={styles.inputField}
               onChangeText={setCode}
+              keyboardType="numeric"
             />
             <TextInput
               placeholder="Enter New password"
@@ -92,6 +93,8 @@ const PwReset = () => {
               onChangeText={setPassword}
               secureTextEntry
               style={styles.inputField}
+              inputMode="text"
+              autoCapitalize="none"
             />
           </View>
           <TouchableOpacity style={styles.resetButton} onPress={onReset}>

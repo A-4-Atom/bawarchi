@@ -70,6 +70,7 @@ const Login = () => {
           secureTextEntry
           style={styles.inputField}
           inputMode="text"
+          autoCapitalize="none"
         />
 
         <View style={styles.row}>

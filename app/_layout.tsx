@@ -11,6 +11,8 @@ import * as SecureStore from "expo-secure-store";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
+const clerkApiKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
 const tokenCache = {
   async getToken(key: string) {
     try {
@@ -76,7 +78,7 @@ function InitialLayout() {
 export default function RootLayout() {
   return (
     <>
-      <ClerkProvider tokenCache={tokenCache}>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={clerkApiKey}>
         <GlobalProvider>
           <InitialLayout />
           <StatusBar backgroundColor="#161622" style="light" />

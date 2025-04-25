@@ -44,7 +44,10 @@ function InitialLayout() {
   });
 
   useEffect(() => {
-    if (fontError) throw fontError;
+    if (fontError) {
+      console.error("Error loading fonts:", fontError);
+      return;
+    }
 
     if (fontsLoaded) {
       hideAsync();

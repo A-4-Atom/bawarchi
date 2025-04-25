@@ -1,4 +1,4 @@
-import * as SplashScreen from "expo-splash-screen";
+import { preventAutoHideAsync, hideAsync } from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -6,17 +6,17 @@ import "../global.css";
 import GlobalProvider from "@/context/GlobalProvider";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { Slot, useRouter, useSegments } from "expo-router";
-import * as SecureStore from "expo-secure-store";
+import { getItemAsync, setItemAsync } from "expo-secure-store";
 
 // Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
+preventAutoHideAsync();
 
 const clerkApiKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 const tokenCache = {
   async getToken(key: string) {
     try {
-      return SecureStore.getItemAsync(key);
+      return getItemAsync(key);
     } catch (error) {
       console.error("Error getting token:", error);
       return null;
@@ -24,7 +24,7 @@ const tokenCache = {
   },
   async saveToken(key: string, value: string) {
     try {
-      await SecureStore.setItemAsync(key, value);
+      await setItemAsync(key, value);
     } catch (error) {
       console.error("Error saving token:", error);
       return;
@@ -37,38 +37,33 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
 
-  const [fontsLoaded] = useFonts({
-    "Roboto-Black": require("../assets/fonts/Roboto-Black.ttf"),
-    "Roboto-BlackItalic": require("../assets/fonts/Roboto-BlackItalic.ttf"),
+  const [fontsLoaded, fontError] = useFonts({
     "Roboto-Bold": require("../assets/fonts/Roboto-Bold.ttf"),
-    "Roboto-BoldItalic": require("../assets/fonts/Roboto-BoldItalic.ttf"),
-    "Roboto-Italic": require("../assets/fonts/Roboto-Italic.ttf"),
     "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
-    "Roboto-LightItalic": require("../assets/fonts/Roboto-LightItalic.ttf"),
-    "Roboto-Medium": require("../assets/fonts/Roboto-Medium.ttf"),
-    "Roboto-MediumItalic": require("../assets/fonts/Roboto-MediumItalic.ttf"),
     "Roboto-Regular": require("../assets/fonts/Roboto-Regular.ttf"),
-    "Roboto-Thin": require("../assets/fonts/Roboto-Thin.ttf"),
-    "Roboto-ThinItalic": require("../assets/fonts/Roboto-ThinItalic.ttf"),
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
+    if (fontError) {
+      console.error("Error loading fonts:", fontError);
+      return;
     }
-  }, [fontsLoaded]);
+
+    if (fontsLoaded) {
+      hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !fontsLoaded) return;
 
-    const inTabsGroup = segments[0] === "(auth)";
+    const inAuthGroup = segments[0] === "(auth)";
+    const nextRoute = isSignedIn ? "/home" : "/welcome";
 
-    if (isSignedIn && !inTabsGroup) {
-      router.replace("/home");
-    } else if (!isSignedIn) {
-      router.replace("/welcome");
+    if ((isSignedIn && !inAuthGroup) || !isSignedIn) {
+      setTimeout(() => router.replace(nextRoute), 0); // smooth routing
     }
-  }, [isSignedIn]);
+  }, [isLoaded, fontsLoaded, isSignedIn]);
 
   if (!isLoaded || !fontsLoaded) return null;
 

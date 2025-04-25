@@ -16,6 +16,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "jsEngine": "hermes",
       "package": "com.vikascsgo.bawarchi"
     },
     "web": {

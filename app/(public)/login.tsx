@@ -170,10 +170,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 15,
     marginTop: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    boxShadow: "2px 4px 6px rgba(0, 0, 0, 0.3)",
     elevation: 5,
   },
   loginButtonText: {

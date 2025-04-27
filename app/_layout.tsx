@@ -49,19 +49,21 @@ function InitialLayout() {
       return;
     }
 
-    if (fontsLoaded) {
+    if (fontsLoaded && isLoaded) {
       hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, isLoaded]);
 
   useEffect(() => {
     if (!isLoaded || !fontsLoaded) return;
 
     const inAuthGroup = segments[0] === "(auth)";
-    const nextRoute = isSignedIn ? "/home" : "/welcome";
+    const inPublicGroup = segments[0] === "(public)";
 
-    if ((isSignedIn && !inAuthGroup) || !isSignedIn) {
-      setTimeout(() => router.replace(nextRoute), 0);
+    if (isSignedIn && !inAuthGroup) {
+      setTimeout(() => router.replace("/home"), 0);
+    } else if (!isSignedIn && !inPublicGroup) {
+      setTimeout(() => router.replace("/welcome"), 0);
     }
   }, [isLoaded, fontsLoaded, isSignedIn]);
 

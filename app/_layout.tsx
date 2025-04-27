@@ -8,7 +8,7 @@ import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { getItemAsync, setItemAsync } from "expo-secure-store";
 
-// Keep the splash screen visible while we fetch resources
+
 preventAutoHideAsync();
 
 const clerkApiKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -49,21 +49,19 @@ function InitialLayout() {
       return;
     }
 
-    if (fontsLoaded && isLoaded) {
+    if (fontsLoaded) {
       hideAsync();
     }
-  }, [fontsLoaded, fontError, isLoaded]);
+  }, [fontsLoaded, fontError]);
 
   useEffect(() => {
     if (!isLoaded || !fontsLoaded) return;
 
     const inAuthGroup = segments[0] === "(auth)";
-    const inPublicGroup = segments[0] === "(public)";
+    const nextRoute = isSignedIn ? "/home" : "/welcome";
 
-    if (isSignedIn && !inAuthGroup) {
-      setTimeout(() => router.replace("/home"), 0);
-    } else if (!isSignedIn && !inPublicGroup) {
-      setTimeout(() => router.replace("/welcome"), 0);
+    if ((isSignedIn && !inAuthGroup) || !isSignedIn) {
+      setTimeout(() => router.replace(nextRoute), 0);
     }
   }, [isLoaded, fontsLoaded, isSignedIn]);
 

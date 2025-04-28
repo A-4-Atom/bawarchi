@@ -37,8 +37,6 @@ const Register = () => {
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
       setPendingVerification(true);
     } catch (err: any) {
       alert(err.errors[0].message);

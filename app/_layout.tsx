@@ -61,7 +61,7 @@ function InitialLayout() {
     const inPublicGroup = segments[0] === "(public)";
 
     if (isSignedIn && !inAuthGroup) {
-      setTimeout(() => router.replace("/home"), 0);
+      setTimeout(() => router.replace("/menu"), 0);
     } else if (!isSignedIn && !inPublicGroup) {
       setTimeout(() => router.replace("/welcome"), 0);
     }

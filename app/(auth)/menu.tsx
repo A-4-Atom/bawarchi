@@ -19,7 +19,7 @@ const Menu = () => {
     <SafeAreaView className="flex-1 bg-[#f9f6f3]">
       <View className="flex-1 bg-[#f9f6f3] mt-6">
         {/* Header */}
-        <View className="py-4 px-4 bg-[#f9f6f3]e rounded-xl mb-4 mt-5">
+        <View className="py-4 px-4 bg-[#f9f6f3] rounded-xl mb-4 mt-5">
           <Text className="text-4xl font-bold">Mess Menu</Text>
           <Text className="text-gray-500 mt-1 text-base py-2">
             Check what's cooking in the mess today

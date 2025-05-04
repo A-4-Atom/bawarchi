@@ -16,7 +16,7 @@ const clerkApiKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 const tokenCache = {
   async getToken(key: string) {
     try {
-      return getItemAsync(key);
+      return await getItemAsync(key); 
     } catch (error) {
       console.error("Error getting token:", error);
       return null;

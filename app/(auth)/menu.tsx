@@ -16,32 +16,32 @@ const Menu = () => {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f5f3ed]">
-      <View className="flex-1 bg-[#FCFBF8 mt-6">
+    <SafeAreaView className="flex-1 bg-[#f9f6f3]">
+      <View className="flex-1 bg-[#f9f6f3] mt-6">
         {/* Header */}
-        <View className="py-6 px-4 bg-[#f5f3ed] mt-5">
+        <View className="py-4 px-4 bg-[#f9f6f3]e rounded-xl mb-4 mt-5">
           <Text className="text-4xl font-bold">Mess Menu</Text>
-          <Text className="text-gray-600 mt-1 text-xl py-2">
+          <Text className="text-gray-500 mt-1 text-base py-2">
             Check what's cooking in the mess today
           </Text>
         </View>
 
         {/* Tabs */}
-        <View className="flex-row px-4 border-b border-gray-200 w-full items-center justify-between">
+        <View className="flex-row px-4 border-b border-gray-200 w-full items-center justify-between mb-2">
           {tabs.map((tab) => (
             <TouchableOpacity
               key={tab.id}
               onPress={() => setActiveTab(tab.id)}
-              className={`py-3 px-6 ${
-                activeTab === tab.id ? "border-b-2 border-[#F97316]" : ""
+              className={`py-2 px-6 ${
+                activeTab === tab.id ? "border-b-2 border-orange-400" : ""
               }`}
             >
               <Text
                 className={`${
                   activeTab === tab.id
-                    ? "text-[#F97316] font-bold"
+                    ? "text-orange-500 font-bold"
                     : "text-gray-600"
-                } text-lg font-[Roboto-Bold]`}
+                } text-lg font-semibold`}
               >
                 {tab.label}
               </Text>
@@ -50,32 +50,33 @@ const Menu = () => {
         </View>
 
         {/* Menu Items */}
-        <ScrollView className="flex-1 px-4 pt-4">
+        <ScrollView className="flex-1 px-4 pt-2">
           {menuData[activeTab].map((item: MenuItem, index: number) => (
-            <View
-              key={index}
-              className="bg-[#FFF] p-4 rounded-lg mb-4 shadow-sm"
-            >
-              <Text className="text-3xl font-bold text-gray-800">
+            <View key={index} className="bg-white p-4 rounded-xl mb-4 shadow">
+              <Text className="text-2xl font-bold text-gray-800 mb-1">
                 {item.name}
               </Text>
-              <Text className="text-gray-600 mt-1 text-md">{item.description}</Text>
-              <View className="mt-4">
+              <Text className="text-gray-500 text-base mb-2">
+                {item.description}
+              </Text>
+              <View className="mt-2 mb-2">
                 <Rating rating={item.rating} />
               </View>
-              <View className="flex-row mt-2 gap-3">
+              <View className="flex-row mt-1 gap-2 flex-wrap">
                 {item.tags.map((tag: string, tagIndex: number) => (
                   <View
                     key={tagIndex}
                     className={`px-3 py-1 rounded-full ${
                       tag === "Vegetarian"
-                        ? "bg-[#16A34A] bg-opacity-20"
+                        ? "bg-green-500 bg-opacity-20"
                         : tag === "Healthy"
-                        ? "bg-[#F97316] bg-opacity-20"
-                        : "bg-gray-400"
+                        ? "bg-orange-400 bg-opacity-20"
+                        : "bg-gray-400 bg-opacity-20"
                     }`}
                   >
-                    <Text className="text-xs text-white font-[Roboto-Bold]">
+                    <Text
+                      className={`text-xs font-semibold text-white`}
+                    >
                       {tag}
                     </Text>
                   </View>

@@ -8,7 +8,6 @@ import {
 import { RadioButton } from "react-native-paper";
 import { useState } from "react";
 import StarRating from "./StarRating";
-import { menuData } from "../data";
 import { useGlobalContext } from "@/context/GlobalProvider";
 
 export default function FeedbackForm() {

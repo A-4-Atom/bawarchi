@@ -11,7 +11,7 @@ export default function RecentFeedbacks() {
         What others are saying
       </Text>
       {feedbacks.map((feedback, index) => (
-        <View key={index} className="mb-4 flex">
+        <View key={feedback.feedbackId} className="mb-4 flex">
           <View className="flex-row justify-between mb-2">
             <Text className="text-lg font-semibold">{feedback.item.name}</Text>
             <Rating rating={feedback.rating} iconSize={18} showNumber={false} />

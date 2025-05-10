@@ -50,7 +50,7 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
       );
       setFeedbacks(response.data);
     } catch (error: any) {
-      console.error("Error fetching menu:", error.message);
+      console.error("Error fetching Feedback:", error.message);
     } finally {
       setLoading(false);
     }

@@ -1,10 +1,8 @@
 import { Text, ScrollView } from "react-native";
-import { useGlobalContext } from "../../context/GlobalProvider";
 import FeedbackForm from "../../components/FeedbackForm";
 import RecentFeedbacks from "../../components/RecentFeedbacks";
 
 const Feedback = () => {
-  const { feedbacks } = useGlobalContext()!;
 
   return (
     <ScrollView className="flex-1 bg-[#f9f6f3] px-4 py-6 mt-10">

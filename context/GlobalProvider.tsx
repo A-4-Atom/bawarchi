@@ -46,7 +46,7 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${backendUrl}/api/feedback?day=${currentDay}`
+        `${backendUrl}/api/feedback?day=${currentDay}&take=4`
       );
       setFeedbacks(response.data);
     } catch (error: any) {

@@ -9,9 +9,12 @@ import { RadioButton } from "react-native-paper";
 import { useState } from "react";
 import StarRating from "./StarRating";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { useAuth } from "@clerk/clerk-expo";
+import axios from "axios";
 
 export default function FeedbackForm() {
   const { menuItems } = useGlobalContext()!;
+  const { userId, getToken } = useAuth();
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState("");
@@ -24,10 +27,33 @@ export default function FeedbackForm() {
     ...(menuItems.DINNER || []),
   ];
 
-  const handleSubmit = () => {
-    // Here you would send feedback to backend
+  const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+  const handleSubmit = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/feedback`,
+        {
+          rating,
+          comment: comments || "",
+          clerkId: userId,
+          itemId: menuItemList.find((item) => item.name === selectedItem)?.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error submitting feedback:", error.message);
+      } else {
+        console.error("Error submitting feedback:", error);
+      }
+    }
     setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 2000);
     setSelectedItem(null);
     setRating(0);
     setComments("");

@@ -5,7 +5,8 @@ export type GlobalProviderProps = {
 };
 
 export type GlobalContextType = {
-  loading: boolean;
+  loadingMenu: boolean;
+  loadingFeedback: boolean;
   feedbacks: Feedback[];
   menuItems: MenuData;
 };
@@ -22,7 +23,6 @@ export type MenuData = {
   LUNCH: MenuItem[];
   DINNER: MenuItem[];
 };
-
 
 export type Feedback = {
   feedbackId: string;
@@ -42,4 +42,12 @@ export type Feedback = {
   userId: string;
 };
 
-export type WeekDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+export type WeekDays = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY"
+];

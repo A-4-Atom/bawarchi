@@ -1,6 +1,11 @@
-import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
-import { GlobalProviderProps, GlobalContextType, Feedback, MenuData } from "@/types/types";
+import {
+  GlobalProviderProps,
+  GlobalContextType,
+  Feedback,
+  MenuData,
+} from "@/types/types";
 import { weekDays } from "@/constants/constants";
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -11,14 +16,15 @@ const getCurrentDay = () => {
   const day = date.getDay();
 
   return weekDays[day === 0 ? 6 : day - 1];
-};    
+};
 
 export const useGlobalContext = () => {
   return useContext(GlobalContext);
 };
 
 const GlobalProvider = ({ children }: GlobalProviderProps) => {
-  const [loading, setLoading] = useState(false);
+  const [loadingMenu, setLoadingMenu] = useState(false);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
   const [currentDay, setCurrentDay] = useState(getCurrentDay());
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [menuItems, setMenuItems] = useState<MenuData>({} as MenuData);
@@ -29,21 +35,19 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
   }, [currentDay]);
 
   const fetchMenu = async () => {
-    setLoading(true);
+    setLoadingMenu(true);
     try {
-      const response = await axios.get(
-        `${backendUrl}/api/menu/${currentDay}`
-      );
+      const response = await axios.get(`${backendUrl}/api/menu/${currentDay}`);
       setMenuItems(response.data);
     } catch (error: any) {
       console.error("Error fetching menu:", error.message);
     } finally {
-      setLoading(false);
+      setLoadingMenu(false);
     }
-  }
+  };
 
   const fetchFeedbacks = async () => {
-    setLoading(true);
+    setLoadingFeedback(true);
     try {
       const response = await axios.get(
         `${backendUrl}/api/feedback?day=${currentDay}&take=4`
@@ -52,13 +56,13 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
     } catch (error: any) {
       console.error("Error fetching Feedback:", error.message);
     } finally {
-      setLoading(false);
+      setLoadingFeedback(false);
     }
   };
 
   return (
     <GlobalContext.Provider
-      value={{ loading, feedbacks, menuItems }}
+      value={{ loadingMenu, loadingFeedback, feedbacks, menuItems }}
     >
       {children}
     </GlobalContext.Provider>

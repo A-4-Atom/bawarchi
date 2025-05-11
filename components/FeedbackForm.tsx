@@ -8,6 +8,7 @@ import {
 import { RadioButton } from "react-native-paper";
 import { useState } from "react";
 import StarRating from "./StarRating";
+import LoadingSpinner from "./LoadingSpinner";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
@@ -19,6 +20,7 @@ export default function FeedbackForm() {
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Flatten menuItems from context (handle undefined or empty)
   const menuItemList = [
@@ -30,6 +32,7 @@ export default function FeedbackForm() {
   const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const token = await getToken();
       await axios.post(
@@ -46,17 +49,25 @@ export default function FeedbackForm() {
           },
         }
       );
+      setLoading(false);
+      alert("Feedback submitted successfully!");
     } catch (error) {
+      setLoading(false);
+      let message = "Error submitting feedback.";
       if (error instanceof Error) {
+        message = error.message;
         console.error("Error submitting feedback:", error.message);
       } else {
         console.error("Error submitting feedback:", error);
       }
+      alert(message);
+    } finally {
+      setLoading(false);
+      setSubmitted(true);
+      setSelectedItem(null);
+      setRating(0);
+      setComments("");
     }
-    setSubmitted(true);
-    setSelectedItem(null);
-    setRating(0);
-    setComments("");
   };
 
   return (
@@ -106,12 +117,16 @@ export default function FeedbackForm() {
         className={`w-full py-3 rounded-lg mt-6 ${
           selectedItem && rating ? "bg-orange-400" : "bg-orange-200"
         }`}
-        disabled={!selectedItem || !rating}
+        disabled={!selectedItem || !rating || loading}
         onPress={handleSubmit}
       >
-        <Text className="text-center text-white text-base font-semibold">
-          {submitted ? "Thank you!" : "Submit Feedback"}
-        </Text>
+        {loading ? (
+          <LoadingSpinner size={28} color="#fff" />
+        ) : (
+          <Text className="text-center text-white text-base font-semibold">
+            Submit Feedback
+          </Text>
+        )}
       </TouchableOpacity>
     </View>
   );

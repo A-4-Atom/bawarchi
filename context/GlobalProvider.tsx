@@ -1,0 +1,72 @@
+import { createContext, useState, useContext, useEffect } from "react";
+import axios from "axios";
+import {
+  GlobalProviderProps,
+  GlobalContextType,
+  Feedback,
+  MenuData,
+} from "@/types/types";
+import { weekDays } from "@/constants/constants";
+
+const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
+
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+const getCurrentDay = () => {
+  const date = new Date();
+  const day = date.getDay();
+
+  return weekDays[day === 0 ? 6 : day - 1];
+};
+
+export const useGlobalContext = () => {
+  return useContext(GlobalContext);
+};
+
+const GlobalProvider = ({ children }: GlobalProviderProps) => {
+  const [loadingMenu, setLoadingMenu] = useState(false);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
+  const [currentDay, setCurrentDay] = useState(getCurrentDay());
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuData>({} as MenuData);
+
+  useEffect(() => {
+    fetchFeedbacks();
+    fetchMenu();
+  }, [currentDay]);
+
+  const fetchMenu = async () => {
+    setLoadingMenu(true);
+    try {
+      const response = await axios.get(`${backendUrl}/api/menu/${currentDay}`);
+      setMenuItems(response.data);
+    } catch (error: any) {
+      console.error("Error fetching menu:", error.message);
+    } finally {
+      setLoadingMenu(false);
+    }
+  };
+
+  const fetchFeedbacks = async () => {
+    setLoadingFeedback(true);
+    try {
+      const response = await axios.get(
+        `${backendUrl}/api/feedback?day=${currentDay}&take=4`
+      );
+      setFeedbacks(response.data);
+    } catch (error: any) {
+      console.error("Error fetching Feedback:", error.message);
+    } finally {
+      setLoadingFeedback(false);
+    }
+  };
+
+  return (
+    <GlobalContext.Provider
+      value={{ loadingMenu, loadingFeedback, feedbacks, menuItems }}
+    >
+      {children}
+    </GlobalContext.Provider>
+  );
+};
+
+export default GlobalProvider;

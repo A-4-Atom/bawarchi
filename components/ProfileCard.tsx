@@ -51,10 +51,7 @@ const ProfileCard = () => {
       </View>
       {user.unsafeMetadata?.isAdmin ? (
         <View className="w-full items-center mt-2">
-          <Pressable
-            className="w-full"
-            onPress={() => router.push("/admin-dashboard")}
-          >
+          <Pressable className="w-full" onPress={() => router.push("/admin")}>
             <Text className="bg-[#F97015] text-white w-full text-center py-3 rounded-md font-semibold text-base">
               Admin Dashboard
             </Text>

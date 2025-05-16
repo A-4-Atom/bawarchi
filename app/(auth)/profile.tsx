@@ -1,57 +1,18 @@
-import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
-import { useState } from 'react';
-import { useUser } from '@clerk/clerk-expo';
+import { Text, ScrollView } from "react-native";
+import ProfileCard from "../../components/ProfileCard";
+import MessCardSummary from "../../components/MessCardSummary";
 
 const Profile = () => {
-  const { user } = useUser();
-  const [firstName, setFirstName] = useState(user?.firstName || '');
-  const [lastName, setLastName] = useState(user?.lastName || '');
-
-  const onSaveUser = async () => {
-
-    if(!user){
-        console.error('User is not available');
-        return;
-    }
-    try {
-      const result = await user.update({
-        firstName: firstName || 'John',
-        lastName: lastName || 'Doe',
-      });
-      console.log('🚀 ~ file: profile.tsx:16 ~ onSaveUser ~ result:', result);
-    } catch (e) {
-      console.log('🚀 ~ file: profile.tsx:18 ~ onSaveUser ~ e', JSON.stringify(e));
-    }
-  };
-
   return (
-    <View style={styles.container}>
-      <Text style={{ textAlign: 'center' }}>
-        Good morning {user?.firstName} {user?.lastName}!
+    <ScrollView className="flex-1 bg-[#f9f6f3] px-4 py-8 mt-7">
+      <Text className="text-4xl font-bold mb-1 mt-8">My Profile</Text>
+      <Text className="text-base text-gray-500 mb-6">
+        Manage your account details and preferences
       </Text>
-
-      <TextInput placeholder="First Name" value={firstName} onChangeText={setFirstName} style={styles.inputField} />
-      <TextInput placeholder="Last Name" value={lastName} onChangeText={setLastName} style={styles.inputField} />
-      <Button onPress={onSaveUser} title="Update account" color={'#6c47ff'}></Button>
-    </View>
+      <ProfileCard />
+      <MessCardSummary />
+    </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 40,
-  },
-  inputField: {
-    marginVertical: 4,
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#6c47ff',
-    borderRadius: 4,
-    padding: 10,
-    backgroundColor: '#fff',
-  },
-});
 
 export default Profile;

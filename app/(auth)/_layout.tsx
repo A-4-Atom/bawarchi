@@ -1,21 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@clerk/clerk-expo";
-import { Pressable } from "react-native";
-
-export const LogoutButton = () => {
-  const { signOut } = useAuth();
-
-  const doLogout = () => {
-    signOut();
-  };
-
-  return (
-    <Pressable onPress={doLogout} style={{ marginRight: 10 }}>
-      <Ionicons name="log-out-outline" size={24} color={'#fff'} />
-    </Pressable>
-  );
-};
 
 const TabsPage = () => {
   const { isSignedIn } = useAuth();
@@ -36,7 +21,7 @@ const TabsPage = () => {
           height: 60,
           justifyContent: "center",
           alignItems: "center",
-        }
+        },
       }}
     >
       <Tabs.Screen
@@ -44,7 +29,7 @@ const TabsPage = () => {
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="restaurant-outline" size={size+4} color={color} />
+            <Ionicons name="restaurant-outline" size={size + 4} color={color} />
           ),
           tabBarLabel: "Menu",
         }}
@@ -55,7 +40,7 @@ const TabsPage = () => {
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart-outline" size={size+4} color={color} />
+            <Ionicons name="cart-outline" size={size + 4} color={color} />
           ),
           tabBarLabel: "Purchase",
         }}
@@ -68,7 +53,7 @@ const TabsPage = () => {
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               name="chatbubble-ellipses-outline"
-              size={size+4}
+              size={size + 4}
               color={color}
             />
           ),
@@ -79,10 +64,9 @@ const TabsPage = () => {
       <Tabs.Screen
         name="profile"
         options={{
-          headerTitle: "My Profile",
-          headerRight: () => <LogoutButton />,
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size+4} color={color} />
+            <Ionicons name="person-outline" size={size + 4} color={color} />
           ),
           tabBarLabel: "My Profile",
         }}

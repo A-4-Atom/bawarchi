@@ -28,22 +28,41 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
   const [currentDay, setCurrentDay] = useState(getCurrentDay());
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [menuItems, setMenuItems] = useState<MenuData>({} as MenuData);
+  // New: cache for all weekday menus
+  const [allMenus, setAllMenus] = useState<Record<string, MenuData>>({});
 
   useEffect(() => {
     fetchFeedbacks();
-    fetchMenu();
+    // Only fetch menu for currentDay if not already cached
+    if (!allMenus[currentDay]) {
+      fetchMenu(currentDay);
+    } else {
+      setMenuItems(allMenus[currentDay]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDay]);
 
-  const fetchMenu = async () => {
+  // Fetch and cache menu for a given day
+  const fetchMenu = async (day: string) => {
     setLoadingMenu(true);
     try {
-      const response = await axios.get(`${backendUrl}/api/menu/${currentDay}`);
-      setMenuItems(response.data);
+      const response = await axios.get(`${backendUrl}/api/menu/${day}`);
+      setAllMenus((prev) => ({ ...prev, [day]: response.data }));
+      // If fetching for currentDay, update menuItems
+      if (day === currentDay) setMenuItems(response.data);
+      return response.data;
     } catch (error: any) {
       console.error("Error fetching menu:", error.message);
+      return null;
     } finally {
       setLoadingMenu(false);
     }
+  };
+
+  // Exposed function for screens to get menu for any day (uses cache)
+  const getMenuForDay = async (day: string): Promise<MenuData | null> => {
+    if (allMenus[day]) return allMenus[day];
+    return await fetchMenu(day);
   };
 
   const fetchFeedbacks = async () => {
@@ -62,7 +81,14 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
 
   return (
     <GlobalContext.Provider
-      value={{ loadingMenu, loadingFeedback, feedbacks, menuItems }}
+      value={{
+        loadingMenu,
+        loadingFeedback,
+        feedbacks,
+        menuItems, // for currentDay (feedback etc)
+        allMenus, // for menu management
+        getMenuForDay, // for menu management
+      }}
     >
       {children}
     </GlobalContext.Provider>

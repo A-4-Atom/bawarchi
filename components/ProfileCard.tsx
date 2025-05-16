@@ -15,7 +15,7 @@ const ProfileCard = () => {
   const collegeName = user.unsafeMetadata?.collegeName || "-";
   const email = user.emailAddresses?.[0]?.emailAddress || "-";
   const memberSince = user.createdAt
-    ? new Date(user.createdAt).toISOString().slice(0, 10)
+    ? new Date(user.createdAt).toLocaleDateString("en-IN")
     : "-";
 
   // Handler for logout button
@@ -51,7 +51,7 @@ const ProfileCard = () => {
       </View>
       {user.unsafeMetadata?.isAdmin ? (
         <View className="w-full items-center mt-2">
-          <Pressable className="w-full" onPress={() => router.push("/analytics")}>
+          <Pressable className="w-full" onPress={() => router.push("/(admin)/analytics")}>
             <Text className="bg-[#F97015] text-white w-full text-center py-3 rounded-md font-semibold text-base">
               Admin Dashboard
             </Text>

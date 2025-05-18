@@ -4,20 +4,26 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Modal,
+  TextInput,
+  Button,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { weekDays } from "@/constants/constants";
 import type { MenuData } from "@/types/types";
 import DropDownPicker from "react-native-dropdown-picker";
+import AddMenuItemModal from "@/components/AddMenuItemModal";
 import MenuMealSection from "@/components/MenuMealSection";
+import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 
 const emptyMenu: MenuData = { BREAKFAST: [], LUNCH: [], DINNER: [] };
-
-type MealType = "BREAKFAST" | "LUNCH" | "DINNER";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MenuManagementScreen = () => {
   const { getMenuForDay, allMenus, loadingMenu } = useGlobalContext()!;
+  const { getToken } = useAuth();
   const [selectedDay, setSelectedDay] = useState(
     weekDays[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]
   );
@@ -25,6 +31,7 @@ const MenuManagementScreen = () => {
     allMenus[selectedDay] || emptyMenu
   );
   const [loading, setLoading] = useState(false);
+  // Main screen dropdown state
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(selectedDay);
   const [items, setItems] = useState(
@@ -33,6 +40,21 @@ const MenuManagementScreen = () => {
       value: day,
     }))
   );
+
+  const [addDayItems, setAddDayItems] = useState(
+    weekDays.map((day) => ({
+      label: day.charAt(0) + day.slice(1).toLowerCase(),
+      value: day,
+    }))
+  );
+
+  // Modal state for Add Menu Item
+  const [showAddModal, setShowAddModal] = useState(false);
+  const mealTypes = [
+    { label: "Breakfast", value: "BREAKFAST" },
+    { label: "Lunch", value: "LUNCH" },
+    { label: "Dinner", value: "DINNER" },
+  ];
 
   useEffect(() => {
     setValue(selectedDay);
@@ -64,6 +86,43 @@ const MenuManagementScreen = () => {
 
   return (
     <View className="flex-1 bg-[#f9f6f3] px-4 py-6 mt-12">
+      {/* Add Menu Item Modal */}
+      <AddMenuItemModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={async (item) => {
+          try {
+            const token = await getToken();
+            const response = await axios.post(
+              `${backendUrl}/api/menu/`,
+              {
+                name: item.name,
+                day: item.day,
+                price: item.price,
+                type: item.type,
+                description: item.description,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            console.log("Menu item added successfully:", response.data);
+            alert("Menu item added successfully!");
+
+            // Refetch the menu for the selected day, forcing a fetch
+            const updatedMenu = await getMenuForDay(selectedDay, true);
+            setMenu(updatedMenu || emptyMenu);
+          } catch (error: any) {
+            alert(`Error adding menu item: ${error.message}`);
+          }
+          setShowAddModal(false);
+        }}
+        dayOptions={addDayItems}
+        mealTypes={mealTypes}
+      />
+
       <View className="justify-center items-center">
         <Text className="text-3xl font-bold mb-1">Menu Management</Text>
       </View>
@@ -74,7 +133,7 @@ const MenuManagementScreen = () => {
         </View>
         <TouchableOpacity
           className="bg-[#F97015] px-4 py-2 rounded-lg"
-          disabled
+          onPress={() => setShowAddModal(true)}
         >
           <Text className="text-white font-semibold">Add Menu Item</Text>
         </TouchableOpacity>

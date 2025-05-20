@@ -5,10 +5,11 @@ import type { WeekDays } from "../types/types";
 
 type DayType = WeekDays[number];
 
-interface AddMenuItemModalProps {
+interface EditMenuItemModalProps {
   visible: boolean;
   onClose: () => void;
-  onAdd: (item: {
+  onUpdate: (item: {
+    id: string;
     name: string;
     price: number;
     description: string;
@@ -17,43 +18,59 @@ interface AddMenuItemModalProps {
   }) => void;
   dayOptions: { label: string; value: DayType }[];
   mealTypes: { label: string; value: string }[];
+  initialData: {
+    id: string;
+    name: string;
+    price: number;
+    description: string;
+    day: DayType;
+    type: string;
+  };
 }
 
-const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
+const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
   visible,
   onClose,
-  onAdd,
+  onUpdate,
   dayOptions,
   mealTypes,
+  initialData,
 }) => {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState(0);
-  const [description, setDescription] = useState("");
-  const [day, setDay] = useState<DayType>(dayOptions[0]?.value);
+  const [name, setName] = useState(initialData.name || "");
+  const [price, setPrice] = useState(initialData.price || 0);
+  const [description, setDescription] = useState(initialData.description || "");
+  const [day, setDay] = useState<DayType>(initialData.day);
   const [dayOpen, setDayOpen] = useState(false);
-  const [type, setType] = useState(mealTypes[0]?.value);
+  const [type, setType] = useState(initialData.type);
   const [typeOpen, setTypeOpen] = useState(false);
 
-  // Reset form when modal opens
+  // Reset form when modal opens or initialData changes
   useEffect(() => {
     if (visible) {
-      setName("");
-      setPrice(0);
-      setDescription("");
-      setDay(dayOptions[0]?.value);
-      setType(mealTypes[0]?.value);
+      setName(initialData.name || "");
+      setPrice(initialData.price || 0);
+      setDescription(initialData.description || "");
+      setDay(initialData.day);
+      setType(initialData.type);
     }
-  }, [visible, dayOptions, mealTypes]);
+  }, [visible, initialData]);
 
-  const handleAdd = () => {
-    onAdd({ name, price, description, day, type });
+  const handleUpdate = () => {
+    onUpdate({
+      id: initialData.id,
+      name,
+      price,
+      description,
+      day,
+      type,
+    });
   };
 
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View className="flex-1 justify-center items-center bg-black/50">
         <View className="bg-white p-6 rounded-lg w-80">
-          <Text className="text-lg font-bold mb-2">Add Menu Item</Text>
+          <Text className="text-lg font-bold mb-2">Edit Menu Item</Text>
           <TextInput
             placeholder="Name"
             value={name}
@@ -99,7 +116,6 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
             items={mealTypes}
             setOpen={setTypeOpen}
             setValue={setType}
-            // Items are static, so we don't need to set them again
             setItems={() => {}}
             containerStyle={{ width: 180, marginBottom: 12 }}
             style={{ backgroundColor: "#fff", borderColor: "#ccc" }}
@@ -114,7 +130,7 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
               <Button title="Cancel" color="#888" onPress={onClose} />
             </View>
             <View style={{ borderRadius: 8, overflow: "hidden" }}>
-              <Button title="Add" color="#F97015" onPress={handleAdd} />
+              <Button title="Update" color="#F97015" onPress={handleUpdate} />
             </View>
           </View>
         </View>
@@ -123,4 +139,4 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
   );
 };
 
-export default AddMenuItemModal;
+export default EditMenuItemModal;

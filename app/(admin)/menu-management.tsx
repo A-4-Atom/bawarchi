@@ -14,6 +14,7 @@ import { weekDays } from "@/constants/constants";
 import type { MenuData } from "@/types/types";
 import DropDownPicker from "react-native-dropdown-picker";
 import AddMenuItemModal from "@/components/AddMenuItemModal";
+import EditMenuItemModal from "@/components/EditMenuItemModal";
 import MenuMealSection from "@/components/MenuMealSection";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
@@ -50,6 +51,55 @@ const MenuManagementScreen = () => {
 
   // Modal state for Add Menu Item
   const [showAddModal, setShowAddModal] = useState(false);
+  // Modal state for Edit Menu Item
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  // Helper to get day label for EditMenuItemModal
+  const getDayLabel = (dayValue: string) => {
+    const found = addDayItems.find((d) => d.value === dayValue);
+    return found ? found.value : addDayItems[0].value;
+  };
+
+  // Handler for edit button
+  const handleEdit = (item: any) => {
+    setEditItem({
+      ...item,
+      day: getDayLabel(item.day || selectedDay),
+      type: item.type || "BREAKFAST",
+      description: item.description || "",
+    });
+    setShowEditModal(true);
+  };
+
+  // Handler for update (PATCH)
+  const handleUpdate = async (updated: any) => {
+    try {
+      const token = await getToken();
+      await axios.patch(
+        `${backendUrl}/api/menu/${updated.id}`,
+        {
+          name: updated.name,
+          day: updated.day,
+          price: updated.price,
+          type: updated.type,
+          description: updated.description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Menu item updated successfully!");
+      // Refetch menu for the selected day
+      const updatedMenu = await getMenuForDay(selectedDay, true);
+      setMenu(updatedMenu || emptyMenu);
+    } catch (error: any) {
+      alert(`Error updating menu item: ${error.message}`);
+    }
+    setShowEditModal(false);
+    setEditItem(null);
+  };
   const mealTypes = [
     { label: "Breakfast", value: "BREAKFAST" },
     { label: "Lunch", value: "LUNCH" },
@@ -123,6 +173,21 @@ const MenuManagementScreen = () => {
         mealTypes={mealTypes}
       />
 
+      {/* Edit Menu Item Modal */}
+      {editItem && (
+        <EditMenuItemModal
+          visible={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditItem(null);
+          }}
+          onUpdate={handleUpdate}
+          dayOptions={addDayItems}
+          mealTypes={mealTypes}
+          initialData={editItem}
+        />
+      )}
+
       <View className="justify-center items-center">
         <Text className="text-3xl font-bold mb-1">Menu Management</Text>
       </View>
@@ -161,9 +226,21 @@ const MenuManagementScreen = () => {
         </View>
       ) : (
         <ScrollView>
-          <MenuMealSection meal="BREAKFAST" items={menu.BREAKFAST} />
-          <MenuMealSection meal="LUNCH" items={menu.LUNCH} />
-          <MenuMealSection meal="DINNER" items={menu.DINNER} />
+          <MenuMealSection
+            meal="BREAKFAST"
+            items={menu.BREAKFAST}
+            onEdit={handleEdit}
+          />
+          <MenuMealSection
+            meal="LUNCH"
+            items={menu.LUNCH}
+            onEdit={handleEdit}
+          />
+          <MenuMealSection
+            meal="DINNER"
+            items={menu.DINNER}
+            onEdit={handleEdit}
+          />
         </ScrollView>
       )}
     </View>

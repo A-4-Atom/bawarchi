@@ -7,7 +7,15 @@ interface MenuMealSectionProps {
   items: (MenuItem & { description?: string })[];
 }
 
-const MenuMealSection = ({ meal, items }: MenuMealSectionProps) => (
+const MenuMealSection = ({
+  meal,
+  items,
+  onEdit,
+  onDelete,
+}: MenuMealSectionProps & {
+  onEdit?: (item: MenuItem & { description?: string }) => void;
+  onDelete?: (item: MenuItem & { description?: string }) => void;
+}) => (
   <View className="mb-8">
     <Text className="text-2xl font-bold mb-2 mt-2">
       {meal.charAt(0) + meal.slice(1).toLowerCase()}
@@ -18,7 +26,14 @@ const MenuMealSection = ({ meal, items }: MenuMealSectionProps) => (
       <Text className="w-1/6 font-semibold">Actions</Text>
     </View>
     {items && items.length > 0 ? (
-      items.map((item) => <MenuItemRow key={item.id} item={item} />)
+      items.map((item) => (
+        <MenuItemRow
+          key={item.id}
+          item={item}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
+      ))
     ) : (
       <Text className="text-gray-400 ml-2">No items</Text>
     )}

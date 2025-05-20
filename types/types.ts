@@ -10,7 +10,10 @@ export type GlobalContextType = {
   feedbacks: Feedback[];
   menuItems: MenuData;
   allMenus: Record<string, MenuData>; // cache for all weekdays
-  getMenuForDay: (day: string) => Promise<MenuData | null>; // fetch/cached menu for any day
+  getMenuForDay: (
+    day: string,
+    forceFetch?: boolean
+  ) => Promise<MenuData | null>; // fetch/cached menu for any day
 };
 
 export type MenuItem = {

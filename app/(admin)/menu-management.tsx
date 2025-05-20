@@ -4,20 +4,25 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { weekDays } from "@/constants/constants";
 import type { MenuData } from "@/types/types";
 import DropDownPicker from "react-native-dropdown-picker";
+import AddMenuItemModal from "@/components/AddMenuItemModal";
+import EditMenuItemModal from "@/components/EditMenuItemModal";
 import MenuMealSection from "@/components/MenuMealSection";
+import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 
 const emptyMenu: MenuData = { BREAKFAST: [], LUNCH: [], DINNER: [] };
-
-type MealType = "BREAKFAST" | "LUNCH" | "DINNER";
+const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MenuManagementScreen = () => {
   const { getMenuForDay, allMenus, loadingMenu } = useGlobalContext()!;
+  const { getToken } = useAuth();
   const [selectedDay, setSelectedDay] = useState(
     weekDays[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]
   );
@@ -25,6 +30,7 @@ const MenuManagementScreen = () => {
     allMenus[selectedDay] || emptyMenu
   );
   const [loading, setLoading] = useState(false);
+  // Main screen dropdown state
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(selectedDay);
   const [items, setItems] = useState(
@@ -33,6 +39,120 @@ const MenuManagementScreen = () => {
       value: day,
     }))
   );
+
+  const [addDayItems, setAddDayItems] = useState(
+    weekDays.map((day) => ({
+      label: day.charAt(0) + day.slice(1).toLowerCase(),
+      value: day,
+    }))
+  );
+
+  // Modal state for Add Menu Item
+  const [showAddModal, setShowAddModal] = useState(false);
+  // Modal state for Edit Menu Item
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  // Helper to get day label for EditMenuItemModal
+  const getDayLabel = (dayValue: string) => {
+    const found = addDayItems.find((d) => d.value === dayValue);
+    return found ? found.value : addDayItems[0].value;
+  };
+
+  // Handler for edit button
+  const handleEdit = (item: any) => {
+    setEditItem({
+      ...item,
+      day: getDayLabel(item.day || selectedDay),
+      type: item.type || "BREAKFAST",
+      description: item.description || "",
+    });
+    setShowEditModal(true);
+  };
+
+  // Handler for delete button
+  const handleDelete = (item: any) => {
+    // Ensure day and type are present, fallback to selectedDay and item.type or meal
+    const day = item.day || selectedDay;
+    // Try to infer type from parent meal if not present
+    let type = item.type;
+    if (!type && item.meal) type = item.meal;
+    // If still not present, fallback to "BREAKFAST"
+    if (!type) type = "BREAKFAST";
+
+    Alert.alert(
+      "Delete Menu Item",
+      `Are you sure you want to delete '${item.name}'?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await getToken();
+              await axios.delete(
+                `${backendUrl}/api/menu/${item.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                  data: {
+                    day,
+                    type,
+                  },
+                }
+              );
+              alert("Menu item deleted successfully!");
+              // Refetch menu for the selected day
+              const updatedMenu = await getMenuForDay(selectedDay, true);
+              setMenu(updatedMenu || emptyMenu);
+            } catch (error: any) {
+              alert(`Error deleting menu item: ${error.message}`);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Handler for update (PATCH)
+  const handleUpdate = async (updated: any) => {
+    try {
+      const token = await getToken();
+      await axios.patch(
+        `${backendUrl}/api/menu/${updated.id}`,
+        {
+          name: updated.name,
+          day: updated.day,
+          price: updated.price,
+          type: updated.type,
+          description: updated.description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Menu item updated successfully!");
+      // Refetch menu for the selected day
+      const updatedMenu = await getMenuForDay(selectedDay, true);
+      setMenu(updatedMenu || emptyMenu);
+    } catch (error: any) {
+      alert(`Error updating menu item: ${error.message}`);
+    }
+    setShowEditModal(false);
+    setEditItem(null);
+  };
+  const mealTypes = [
+    { label: "Breakfast", value: "BREAKFAST" },
+    { label: "Lunch", value: "LUNCH" },
+    { label: "Dinner", value: "DINNER" },
+  ];
 
   useEffect(() => {
     setValue(selectedDay);
@@ -64,6 +184,58 @@ const MenuManagementScreen = () => {
 
   return (
     <View className="flex-1 bg-[#f9f6f3] px-4 py-6 mt-12">
+      {/* Add Menu Item Modal */}
+      <AddMenuItemModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={async (item) => {
+          try {
+            const token = await getToken();
+            const response = await axios.post(
+              `${backendUrl}/api/menu/`,
+              {
+                name: item.name,
+                day: item.day,
+                price: item.price,
+                type: item.type,
+                description: item.description,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            console.log("Menu item added successfully:", response.data);
+            alert("Menu item added successfully!");
+
+            // Refetch the menu for the selected day, forcing a fetch
+            const updatedMenu = await getMenuForDay(selectedDay, true);
+            setMenu(updatedMenu || emptyMenu);
+          } catch (error: any) {
+            alert(`Error adding menu item: ${error.message}`);
+          }
+          setShowAddModal(false);
+        }}
+        dayOptions={addDayItems}
+        mealTypes={mealTypes}
+      />
+
+      {/* Edit Menu Item Modal */}
+      {editItem && (
+        <EditMenuItemModal
+          visible={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditItem(null);
+          }}
+          onUpdate={handleUpdate}
+          dayOptions={addDayItems}
+          mealTypes={mealTypes}
+          initialData={editItem}
+        />
+      )}
+
       <View className="justify-center items-center">
         <Text className="text-3xl font-bold mb-1">Menu Management</Text>
       </View>
@@ -74,7 +246,7 @@ const MenuManagementScreen = () => {
         </View>
         <TouchableOpacity
           className="bg-[#F97015] px-4 py-2 rounded-lg"
-          disabled
+          onPress={() => setShowAddModal(true)}
         >
           <Text className="text-white font-semibold">Add Menu Item</Text>
         </TouchableOpacity>
@@ -102,9 +274,24 @@ const MenuManagementScreen = () => {
         </View>
       ) : (
         <ScrollView>
-          <MenuMealSection meal="BREAKFAST" items={menu.BREAKFAST} />
-          <MenuMealSection meal="LUNCH" items={menu.LUNCH} />
-          <MenuMealSection meal="DINNER" items={menu.DINNER} />
+          <MenuMealSection
+            meal="BREAKFAST"
+            items={menu.BREAKFAST}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+          <MenuMealSection
+            meal="LUNCH"
+            items={menu.LUNCH}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+          <MenuMealSection
+            meal="DINNER"
+            items={menu.DINNER}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </ScrollView>
       )}
     </View>

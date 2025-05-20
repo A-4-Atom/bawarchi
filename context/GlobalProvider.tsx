@@ -60,8 +60,11 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
   };
 
   // Exposed function for screens to get menu for any day (uses cache)
-  const getMenuForDay = async (day: string): Promise<MenuData | null> => {
-    if (allMenus[day]) return allMenus[day];
+  const getMenuForDay = async (
+    day: string,
+    forceFetch = false
+  ): Promise<MenuData | null> => {
+    if (!forceFetch && allMenus[day]) return allMenus[day];
     return await fetchMenu(day);
   };
 

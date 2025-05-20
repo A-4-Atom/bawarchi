@@ -17,6 +17,7 @@ const ProfileCard = () => {
   const memberSince = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-IN")
     : "-";
+  const fullName = user.unsafeMetadata?.fullName?.toString() || "-";
 
   // Handler for logout button
   const handleLogout = () => {
@@ -35,9 +36,7 @@ const ProfileCard = () => {
           <Text className="text-3xl font-bold text-gray-500">{initials}</Text>
         </View>
       )}
-      <Text className="text-2xl font-bold mt-1">
-        {user.firstName} {user.lastName}
-      </Text>
+      <Text className="text-2xl font-bold mt-1">{fullName}</Text>
       {collegeName ? (
         <Text className="text-base text-gray-500 mb-2">
           {collegeName.toString()}

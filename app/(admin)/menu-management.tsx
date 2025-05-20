@@ -4,9 +4,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Modal,
-  TextInput,
-  Button,
+  Alert,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useGlobalContext } from "@/context/GlobalProvider";
@@ -69,6 +67,56 @@ const MenuManagementScreen = () => {
       description: item.description || "",
     });
     setShowEditModal(true);
+  };
+
+  // Handler for delete button
+  const handleDelete = (item: any) => {
+    // Ensure day and type are present, fallback to selectedDay and item.type or meal
+    const day = item.day || selectedDay;
+    // Try to infer type from parent meal if not present
+    let type = item.type;
+    if (!type && item.meal) type = item.meal;
+    // If still not present, fallback to "BREAKFAST"
+    if (!type) type = "BREAKFAST";
+
+    Alert.alert(
+      "Delete Menu Item",
+      `Are you sure you want to delete '${item.name}'?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await getToken();
+              await axios.delete(
+                `${backendUrl}/api/menu/${item.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                  data: {
+                    day,
+                    type,
+                  },
+                }
+              );
+              alert("Menu item deleted successfully!");
+              // Refetch menu for the selected day
+              const updatedMenu = await getMenuForDay(selectedDay, true);
+              setMenu(updatedMenu || emptyMenu);
+            } catch (error: any) {
+              alert(`Error deleting menu item: ${error.message}`);
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Handler for update (PATCH)
@@ -230,16 +278,19 @@ const MenuManagementScreen = () => {
             meal="BREAKFAST"
             items={menu.BREAKFAST}
             onEdit={handleEdit}
+            onDelete={handleDelete}
           />
           <MenuMealSection
             meal="LUNCH"
             items={menu.LUNCH}
             onEdit={handleEdit}
+            onDelete={handleDelete}
           />
           <MenuMealSection
             meal="DINNER"
             items={menu.DINNER}
             onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         </ScrollView>
       )}

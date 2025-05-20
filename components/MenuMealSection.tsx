@@ -29,7 +29,7 @@ const MenuMealSection = ({
       items.map((item) => (
         <MenuItemRow
           key={item.id}
-          item={item}
+          item={{ ...item, type: meal }}
           onEdit={onEdit}
           onDelete={onDelete}
         />
